@@ -14,9 +14,11 @@ public with sharing class AccountHandler implements TriggerHandler {
     }
 
     public void onAfterInsert(List<SObject> newRecords) {
+        SharingModelService.setSharedAccountsForAccounts(newRecords);
     }
 
     public void onAfterUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap) {
+        SharingModelService.updateSharedAccountsForAccounts(newRecords, (Map<Id, Account>) oldRecordsMap);
     }
 
     public void onAfterDelete(List<SObject> oldRecords) {

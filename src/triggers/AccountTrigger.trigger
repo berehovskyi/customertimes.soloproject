@@ -1,10 +1,10 @@
 /**
- * Created by oberegovskyi on 01-Nov-18.
+ * Created by oberegovskyi on 03-Nov-18.
  */
 
-trigger TerrUserTrigger on TerrUser__c (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+trigger AccountTrigger on Account (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
 
-    TriggerHandler handler = TriggerFactory.createHandler(TerrUser__c.SObjectType);
+    TriggerHandler handler = TriggerFactory.createHandler(Account.SObjectType);
 
 //    if (Trigger.isBefore) {
 //        if (Trigger.isInsert) {
@@ -22,12 +22,12 @@ trigger TerrUserTrigger on TerrUser__c (before insert, before update, before del
         if (Trigger.isInsert) {
             handler.onAfterInsert(Trigger.new);
         }
-//        if (Trigger.isUpdate) {
-//            handler.onAfterUpdate(Trigger.new, Trigger.oldMap);
-//        }
-        if (Trigger.isDelete) {
-            handler.onAfterDelete(Trigger.old);
+        if (Trigger.isUpdate) {
+            handler.onAfterUpdate(Trigger.new, Trigger.oldMap);
         }
+//        if (Trigger.isDelete) {
+//            handler.onAfterDelete(Trigger.old);
+//        }
 //        if (Trigger.isUndelete) {
 //            handler.onAfterUndelete(Trigger.new);
 //        }

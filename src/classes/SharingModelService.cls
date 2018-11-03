@@ -5,13 +5,9 @@
 public with sharing class SharingModelService {
 
     public static void setSharedAccountsAndContactsForTerrUsers(List<TerrUser__c> newTerrUsers) {
-
         Map<Id, Set<Id>> userIdsSetByTerritoryIdMap = getUserIdsSetByTerritoryIdMap(newTerrUsers);
-
         addHierarchicalRelationships(userIdsSetByTerritoryIdMap);
-
         List<Account> accounts = getAccountsOf(userIdsSetByTerritoryIdMap);
-
         List<AccountShare> accountShares = new List<AccountShare>();
         List<ContactShare> contactShares = new List<ContactShare>();
         for (Account acc : accounts) {
@@ -29,31 +25,70 @@ public with sharing class SharingModelService {
 
     public static void deleteSharedAccountsAndContactsForTerrUsers(List<TerrUser__c> oldTerrUsers) {
         Map<Id, Set<Id>> userIdsSetByTerritoryIdMap = getUserIdsSetByTerritoryIdMap(oldTerrUsers);
-
         addHierarchicalRelationships(userIdsSetByTerritoryIdMap);
-
         Set<Id> usersIds = getUsersIds(userIdsSetByTerritoryIdMap);
-
         List<Account> accounts = getAccountsOf(userIdsSetByTerritoryIdMap);
-
         List<AccountShare> accountShares = getAccountShares(accounts, usersIds);
-
-
         List<AccountShare> accountSharesToDelete = getAccountSharesToDelete(accountShares, userIdsSetByTerritoryIdMap);
-
         Map<Id, List<Reference__c>> referencesByContactIdsMap = getReferencesByContactIdsMap(accounts);
-
         List<ContactShare> contactShares = getContactShares(referencesByContactIdsMap, usersIds);
-
-
-        List<ContactShare> contactSharesToDelete = getContactSharesToDelete(contactShares, referencesByContactIdsMap, userIdsSetByTerritoryIdMap);
-
+        List<ContactShare> contactSharesToDelete = getContactSharesToDelete(
+                contactShares, referencesByContactIdsMap, userIdsSetByTerritoryIdMap
+        );
 
         delete accountSharesToDelete;
         delete contactSharesToDelete;
-
-
     }
+
+    public static void setSharedAccountsForAccounts(List<Account> newAccounts) {
+        Map<Id, Territory__c> relatedTerritoriesByIdMap = getRelatedTerritoriesByIdMap(newAccounts);
+        List<AccountShare> accountShares = getAccountSharesForParentTerritories(newAccounts, relatedTerritoriesByIdMap);
+
+        insert accountShares;
+    }
+
+    public static void updateSharedAccountsForAccounts(List<Account> newAccounts, Map<Id, Account> oldAccountsMap){
+    }
+
+
+    private static Map<Id, Territory__c> getRelatedTerritoriesByIdMap(List<Account> newAccounts) {
+        Set<Id> territoriesIds = SObjectsHelper.getIdFieldValues(newAccounts, Account.Territory__c);
+        Map<Id, Territory__c> relatedTerritoriesByIdMap = new Map<Id, Territory__c>();
+
+        Set<Id> parentIds = new Set<Id>(territoriesIds);
+        do {
+            List<Territory__c> territories = getParentTerritories(parentIds);
+            for (Territory__c territory : territories) {
+                relatedTerritoriesByIdMap.put(territory.Id, territory);
+            }
+            parentIds.clear();
+            parentIds = SObjectsHelper.getIdFieldValues(territories, Territory__c.Parent_Territory__c);
+        } while (!parentIds.isEmpty());
+        return relatedTerritoriesByIdMap;
+    }
+
+
+    private static List<AccountShare> getAccountSharesForParentTerritories(List<Account> newAccounts, Map<Id, Territory__c> relatedTerritoriesByIdMap) {
+        List<AccountShare> acctAccountSharesToInsert = new List<AccountShare>();
+        for (Account acc : newAccounts) {
+            if (relatedTerritoriesByIdMap.containsKey(acc.Territory__c)) {
+                Territory__c currentTerritory = relatedTerritoriesByIdMap.get(acc.Territory__c);
+                Boolean hasParent = false;
+                do {
+                    for (TerrUser__c terrUser : currentTerritory.TerrUsers__r) {
+                        AccountShare accShare = createAccountShare(acc, terrUser.User__c);
+                        acctAccountSharesToInsert.add(accShare);
+                    }
+                    hasParent = currentTerritory.Parent_Territory__c != null;
+                    if (hasParent) {
+                        currentTerritory = relatedTerritoriesByIdMap.get(currentTerritory.Parent_Territory__c);
+                    }
+                } while (hasParent);
+            }
+        }
+        return acctAccountSharesToInsert;
+    }
+
 
     private static List<ContactShare> getContactSharesToDelete(List<ContactShare> contactShares, Map<Id, List<Reference__c>> referencesByContactIdsMap, Map<Id, Set<Id>> userIdsSetByTerritoryIdMap) {
         List<ContactShare> contactSharesToDelete = new List<ContactShare>();
@@ -67,16 +102,10 @@ public with sharing class SharingModelService {
         return contactSharesToDelete;
     }
 
-    private static List<AccountShare> getAccountShares(List<Account> accounts, Set<Id> usersIds) {
-        List<AccountShare> accountShares = [SELECT Id, AccountId, Account.Territory__c, UserOrGroupId FROM AccountShare WHERE (AccountId IN :accounts AND UserOrGroupId IN :usersIds)];
-        return accountShares;
-    }
 
     private static List<AccountShare> getAccountSharesToDelete(List<AccountShare> accountShares, Map<Id, Set<Id>> userIdsSetByTerritoryIdMap) {
         List<AccountShare> accountSharesToDelete = new List<AccountShare>();
         for (AccountShare accShare : accountShares) {
-            System.debug('accShare.Account.Territory__c: ' + accShare.Account.Territory__c);
-            System.debug('accShare.UserOrGroupId: ' + accShare.UserOrGroupId);
             if (userIdsSetByTerritoryIdMap.get(accShare.Account.Territory__c).contains(accShare.UserOrGroupId)) {
                 accountSharesToDelete.add(accShare);
             }
@@ -84,10 +113,6 @@ public with sharing class SharingModelService {
         return accountSharesToDelete;
     }
 
-    private static List<ContactShare> getContactShares(Map<Id, List<Reference__c>> referencesByContactIdsMap, Set<Id> usersIds) {
-        List<ContactShare> contactShares = [SELECT Id, ContactId, UserOrGroupId FROM ContactShare WHERE (ContactId IN :referencesByContactIdsMap.keySet() AND UserOrGroupId IN :usersIds)];
-        return contactShares;
-    }
 
     private static Map<Id, List<Reference__c>> getReferencesByContactIdsMap(List<Account> accounts) {
         Map<Id, List<Reference__c>> referencesByContactIdsMap = new Map<Id, List<Reference__c>>();
@@ -129,10 +154,6 @@ public with sharing class SharingModelService {
         } while (!parentIds.isEmpty());
     }
 
-    private static List<Territory__c> getChildTerritories(Set<Id> parentIds) {
-        List<Territory__c> currentTerr = [SELECT Id, Parent_Territory__c FROM Territory__c WHERE Parent_Territory__c IN :parentIds];
-        return currentTerr;
-    }
 
     private static Map<Id, Set<Id>> getUserIdsSetByTerritoryIdMap(List<TerrUser__c> newTerrUsers) {
         Map<Id, Set<Id>> userIdsSetByTerritoryIdMap = new Map<Id, Set<Id>>();
@@ -157,32 +178,64 @@ public with sharing class SharingModelService {
         }
     }
 
+    private static List<Territory__c> getParentTerritories(Set<Id> parentIds) {
+        return [
+                SELECT Id, Name, Parent_Territory__c, (
+                        SELECT User__c
+                        FROM TerrUsers__r
+                )
+                FROM Territory__c
+                WHERE Id IN :parentIds
+        ];
+    }
+
+    private static List<Territory__c> getChildTerritories(Set<Id> parentIds) {
+        return [
+                SELECT Id, Parent_Territory__c
+                FROM Territory__c
+                WHERE Parent_Territory__c IN :parentIds
+        ];
+    }
+
     private static List<Account> getAccountsOf(Map<Id, Set<Id>> userIdsSetByTerritoryIdMap) {
-        List<Account> accounts = [
+        return [
                 SELECT Id, Territory__c, (SELECT Account__c, Account__r.Territory__c, Contact__c FROM References__r)
                 FROM Account
                 WHERE Territory__c IN :userIdsSetByTerritoryIdMap.keySet()
         ];
-        return accounts;
+    }
+
+    private static List<AccountShare> getAccountShares(List<Account> accounts, Set<Id> usersIds) {
+        return [
+                SELECT Id, AccountId, Account.Territory__c, UserOrGroupId
+                FROM AccountShare
+                WHERE (AccountId IN :accounts AND UserOrGroupId IN :usersIds)
+        ];
+    }
+
+    private static List<ContactShare> getContactShares(Map<Id, List<Reference__c>> referencesByContactIdsMap, Set<Id> usersIds) {
+        return [
+                SELECT Id, ContactId, UserOrGroupId
+                FROM ContactShare
+                WHERE (ContactId IN :referencesByContactIdsMap.keySet() AND UserOrGroupId IN :usersIds)
+        ];
     }
 
     private static AccountShare createAccountShare(Account acc, Id userId) {
-        AccountShare accountShare = new AccountShare(
+        return new AccountShare(
                 AccountId = acc.Id,
                 AccountAccessLevel = 'Edit',
                 OpportunityAccessLevel = 'None',
                 UserOrGroupId = userId
         );
-        return accountShare;
     }
 
     private static ContactShare createContactShare(Reference__c reference, Id userId) {
-        ContactShare contactShare = new ContactShare(
+        return new ContactShare(
                 ContactId = reference.Contact__c,
                 ContactAccessLevel = 'Edit',
                 UserOrGroupId = userId
         );
-        return contactShare;
     }
 
 }
