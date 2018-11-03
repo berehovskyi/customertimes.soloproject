@@ -31,7 +31,7 @@ public with sharing class SharingModelService {
         List<AccountShare> accountShares = getAccountShares(accounts, usersIds);
         List<AccountShare> accountSharesToDelete = getAccountSharesToDelete(accountShares, userIdsSetByTerritoryIdMap);
         Map<Id, List<Reference__c>> referencesByContactIdsMap = getReferencesByContactIdsMap(accounts);
-        List<ContactShare> contactShares = getContactShares(referencesByContactIdsMap, usersIds);
+        List<ContactShare> contactShares = getContactShares(referencesByContactIdsMap.keySet(), usersIds);
         List<ContactShare> contactSharesToDelete = getContactSharesToDelete(
                 contactShares, referencesByContactIdsMap, userIdsSetByTerritoryIdMap
         );
@@ -48,6 +48,19 @@ public with sharing class SharingModelService {
     }
 
     public static void updateSharedAccountsForAccounts(List<Account> newAccounts, Map<Id, Account> oldAccountsMap){
+        List<Account> newAccountsWithChangedTerritory = new List<Account>();
+        for(Account acc :newAccounts){
+            Account oldAcc = oldAccountsMap.get(acc.Id);
+            if(acc.Territory__c != oldAcc.Territory__c){
+                newAccountsWithChangedTerritory.add(acc);
+            }
+        }
+        delete [
+            select id
+            from AccountShare
+            where AccountId in :newAccountsWithChangedTerritory and RowCause = 'Manual'
+            ];
+        setSharedAccountsForAccounts(newAccountsWithChangedTerritory);
     }
 
 
@@ -213,11 +226,11 @@ public with sharing class SharingModelService {
         ];
     }
 
-    private static List<ContactShare> getContactShares(Map<Id, List<Reference__c>> referencesByContactIdsMap, Set<Id> usersIds) {
+    private static List<ContactShare> getContactShares(Set<Id> contIdsSet, Set<Id> usersIds) {
         return [
                 SELECT Id, ContactId, UserOrGroupId
                 FROM ContactShare
-                WHERE (ContactId IN :referencesByContactIdsMap.keySet() AND UserOrGroupId IN :usersIds)
+                WHERE (ContactId IN :contIdsSet AND UserOrGroupId IN :usersIds)
         ];
     }
 
@@ -226,7 +239,8 @@ public with sharing class SharingModelService {
                 AccountId = acc.Id,
                 AccountAccessLevel = 'Edit',
                 OpportunityAccessLevel = 'None',
-                UserOrGroupId = userId
+                UserOrGroupId = userId,
+                RowCause = 'Manual'
         );
     }
 
@@ -234,7 +248,8 @@ public with sharing class SharingModelService {
         return new ContactShare(
                 ContactId = reference.Contact__c,
                 ContactAccessLevel = 'Edit',
-                UserOrGroupId = userId
+                UserOrGroupId = userId,
+                RowCause = 'Manual'
         );
     }
 
