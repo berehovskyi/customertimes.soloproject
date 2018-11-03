@@ -6,16 +6,16 @@ public interface TriggerHandler {
 
     void onBeforeInsert(List<SObject> newRecords);
 
-    void onBeforeUpdate(SObject newRecords, SObject oldRecordsMap);
+    void onBeforeUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap);
 
-    void onBeforeDelete(SObject oldRecords);
+    void onBeforeDelete(List<SObject> oldRecords);
 
-    void onAfterInsert(SObject newRecords);
+    void onAfterInsert(List<SObject> newRecords);
 
-    void onAfterUpdate(SObject newRecords, SObject oldRecordsMap);
+    void onAfterUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap);
 
-    void onAfterDelete(SObject oldRecords);
+    void onAfterDelete(List<SObject> oldRecords);
 
-    void onAfterUndelete(SObject newRecords);
+    void onAfterUndelete(List<SObject> newRecords);
 
 }

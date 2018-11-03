@@ -5,27 +5,26 @@
 public with sharing class TerrUserHandler implements TriggerHandler {
 
     public void onBeforeInsert(List<SObject> newRecords) {
-        System.debug('INSIDE TERR USER HANDLER');
-
-        AccountSharingModelService.setSharedAccountsForTerrUsers(newRecords);
     }
 
-    public void onBeforeUpdate(SObject newRecords, SObject oldRecordsMap) {
+    public void onBeforeUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap) {
     }
 
-    public void onBeforeDelete(SObject oldRecords) {
+    public void onBeforeDelete(List<SObject> oldRecords) {
     }
 
-    public void onAfterInsert(SObject newRecords) {
+    public void onAfterInsert(List<SObject> newRecords) {
+        SharingModelService.setSharedAccountsAndContactsForTerrUsers(newRecords);
     }
 
-    public void onAfterUpdate(SObject newRecords, SObject oldRecordsMap) {
+    public void onAfterUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap) {
     }
 
-    public void onAfterDelete(SObject oldRecords) {
+    public void onAfterDelete(List<SObject> oldRecords) {
+        SharingModelService.deleteSharedAccountsAndContactsForTerrUsers(oldRecords);
     }
 
-    public void onAfterUndelete(SObject newRecords) {
+    public void onAfterUndelete(List<SObject> newRecords) {
     }
 
 }

@@ -7,22 +7,22 @@ public with sharing class AccountHandler implements TriggerHandler {
     public void onBeforeInsert(List<SObject> newRecords) {
     }
 
-    public void onBeforeUpdate(SObject newRecords, SObject oldRecordsMap) {
+    public void onBeforeUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap) {
     }
 
-    public void onBeforeDelete(SObject oldRecords) {
+    public void onBeforeDelete(List<SObject> oldRecords) {
     }
 
-    public void onAfterInsert(SObject newRecords) {
+    public void onAfterInsert(List<SObject> newRecords) {
     }
 
-    public void onAfterUpdate(SObject newRecords, SObject oldRecordsMap) {
+    public void onAfterUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap) {
     }
 
-    public void onAfterDelete(SObject oldRecords) {
+    public void onAfterDelete(List<SObject> oldRecords) {
     }
 
-    public void onAfterUndelete(SObject newRecords) {
+    public void onAfterUndelete(List<SObject> newRecords) {
     }
 
 }
