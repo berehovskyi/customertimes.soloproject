@@ -15,13 +15,13 @@ public with sharing class TriggerFactory {
 
     public static TriggerHandler getHandler(Schema.SObjectType sObjectType) {
         if (sObjectType == Account.SObjectType) {
-            return new AccountHandler();
+            return new AccountTriggerHandler();
         } else if (sObjectType == TerrUser__c.SObjectType) {
-            return new TerrUserHandler();
+            return new TerrUserTriggerHandler();
         } else if (sObjectType == Reference__c.SObjectType) {
-            return new ReferenceHandler();
+            return new ReferenceTriggerHandler();
         } else if (sObjectType == Territory__c.SObjectType) {
-            return new TerritoryHandler();
+            return new TerritoryTriggerHandler();
         } else {
             return null;
         }

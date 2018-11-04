@@ -6,7 +6,7 @@ public with sharing class AccountSelector {
 
     public static List<Account> selectByTerritories(Set<Id> territoryIdsSet) {
         return [
-                SELECT Id, Territory__c, (
+                SELECT Territory__c, (
                         SELECT Account__c, Account__r.Territory__c, Contact__c
                         FROM References__r
                 )

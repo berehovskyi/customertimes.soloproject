@@ -1,8 +1,8 @@
 /**
- * Created by oberegovskyi on 04-Nov-18.
+ * Created by oberegovskyi on 01-Nov-18.
  */
 
-public with sharing class ReferenceHandler implements TriggerHandler {
+public with sharing class TerrUserTriggerHandler implements TriggerHandler {
 
     public void onBeforeInsert(List<SObject> newRecords) {
     }
@@ -14,14 +14,14 @@ public with sharing class ReferenceHandler implements TriggerHandler {
     }
 
     public void onAfterInsert(List<SObject> newRecords) {
-        SharingModelService.setSharedContactsForReferences(newRecords);
+        SharingModelService.setSharedAccountsAndContactsForTerrUsers(newRecords);
     }
 
     public void onAfterUpdate(List<SObject> newRecords, Map<Id, SObject> oldRecordsMap) {
     }
 
     public void onAfterDelete(List<SObject> oldRecords) {
-        SharingModelService.deleteSharedContactsForReferences(oldRecords);
+        SharingModelService.deleteSharedAccountsAndContactsForTerrUsers(oldRecords);
     }
 
     public void onAfterUndelete(List<SObject> newRecords) {
