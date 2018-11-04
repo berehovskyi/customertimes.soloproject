@@ -17,7 +17,7 @@ public with sharing class TerritorySelector {
 
     public static List<Territory__c> selectByParentTerritoryIdsSet(Set<Id> territoryIdsSet) {
         return [
-                SELECT Id, Parent_Territory__c
+                SELECT Id, Name, Parent_Territory__c
                 FROM Territory__c
                 WHERE Parent_Territory__c IN :territoryIdsSet
         ];

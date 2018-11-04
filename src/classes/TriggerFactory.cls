@@ -20,6 +20,8 @@ public with sharing class TriggerFactory {
             return new TerrUserHandler();
         } else if (sObjectType == Reference__c.SObjectType) {
             return new ReferenceHandler();
+        } else if (sObjectType == Territory__c.SObjectType) {
+            return new TerritoryHandler();
         } else {
             return null;
         }

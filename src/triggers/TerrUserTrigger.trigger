@@ -2,7 +2,7 @@
  * Created by oberegovskyi on 01-Nov-18.
  */
 
-trigger TerrUserTrigger on TerrUser__c (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+trigger TerrUserTrigger on TerrUser__c (/*before insert, before update, before delete, */after insert, /*after update, */after delete/*, after undelete*/) {
 
     TriggerHandler handler = TriggerFactory.createHandler(TerrUser__c.SObjectType);
 

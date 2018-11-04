@@ -2,7 +2,7 @@
  * Created by oberegovskyi on 04-Nov-18.
  */
 
-trigger ReferenceTrigger on Reference__c (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+trigger ReferenceTrigger on Reference__c (/*before insert, before update, before delete, */after insert, /*after update, */after delete/*, after undelete*/) {
 
     TriggerHandler handler = TriggerFactory.createHandler(Reference__c.SObjectType);
 

@@ -88,6 +88,7 @@ public with sharing class SharingModelService {
         delete contactSharesToDelete;
     }
 
+    @TestVisible
     private static List<ContactShare> getFilteredContactSharesToDelete(
             List<ContactShare> potentialContactSharesToDelete,
             Map<Id, Set<Id>> accountIdsSetByContactIdMap,
@@ -105,6 +106,7 @@ public with sharing class SharingModelService {
         return contactSharesToDelete;
     }
 
+    @TestVisible
     private static List<ContactShare> getContactSharesToDelete(
             List<Account> newAccountsWithChangedTerritory,
             Map<Id, Set<Id>> contactIdsSetByAccountIdFromReferenceMap,
@@ -123,6 +125,7 @@ public with sharing class SharingModelService {
         return contactSharesToDelete;
     }
 
+    @TestVisible
     private static List<ContactShare> getContactSharesToDelete(
             List<ContactShare> contactShares,
             Map<Id, List<Reference__c>> referencesByContactIdsMap,
@@ -138,6 +141,7 @@ public with sharing class SharingModelService {
         return contactSharesToDelete;
     }
 
+    @TestVisible
     private static Map<Id, List<ContactShare>> getContactSharesListByContactIdMap(List<ContactShare> contactSharesToPotentialDelete) {
         Map<Id, List<ContactShare>> contactSharesListByContactIdMap = new Map<Id, List<ContactShare>>();
         for (ContactShare contactShare : contactSharesToPotentialDelete) {
@@ -153,6 +157,7 @@ public with sharing class SharingModelService {
         return contactSharesListByContactIdMap;
     }
 
+    @TestVisible
     private static List<Account> getNewAccountsWithChangedTerritory(List<Account> newAccounts, Map<Id, Account> oldAccountsMap) {
         List<Account> newAccountsWithChangedTerritory = new List<Account>();
         for (Account acc : newAccounts) {
@@ -164,6 +169,7 @@ public with sharing class SharingModelService {
         return newAccountsWithChangedTerritory;
     }
 
+    @TestVisible
     private static List<ContactShare> createContactSharesToInsert(List<AccountShare> alreadyExistedAccountShares, Map<Id, Set<Id>> contactIdsSetByAccountIdMap) {
         List<ContactShare> contactSharesToInsert = new List<ContactShare>();
         for (AccountShare accShare : alreadyExistedAccountShares) {
@@ -175,6 +181,7 @@ public with sharing class SharingModelService {
         return contactSharesToInsert;
     }
 
+    @TestVisible
     private static Map<Id, Territory__c> getRelatedTerritoriesByIdMap(List<Account> newAccounts) {
         Set<Id> territoriesIds = SObjectsHelper.getIdFieldValues(newAccounts, Account.Territory__c);
         Map<Id, Territory__c> relatedTerritoriesByIdMap = new Map<Id, Territory__c>();
@@ -191,6 +198,7 @@ public with sharing class SharingModelService {
     }
 
 
+    @TestVisible
     private static List<AccountShare> getAccountSharesForParentTerritories(List<Account> newAccounts, Map<Id, Territory__c> relatedTerritoriesByIdMap) {
         List<AccountShare> acctAccountSharesToInsert = new List<AccountShare>();
         Map<Id, Account> accountsWithReferences = getAccountsWithReferencesById(newAccounts);
@@ -220,6 +228,7 @@ public with sharing class SharingModelService {
         return acctAccountSharesToInsert;
     }
 
+    @TestVisible
     private static List<AccountShare> getAccountSharesToDelete(List<AccountShare> accountShares, Map<Id, Set<Id>> userIdsSetByTerritoryIdMap) {
         List<AccountShare> accountSharesToDelete = new List<AccountShare>();
         for (AccountShare accShare : accountShares) {
@@ -230,7 +239,7 @@ public with sharing class SharingModelService {
         return accountSharesToDelete;
     }
 
-
+    @TestVisible
     private static Map<Id, List<Reference__c>> getReferencesByContactIdsMap(List<Account> accounts) {
         Map<Id, List<Reference__c>> referencesByContactIdsMap = new Map<Id, List<Reference__c>>();
         for (Account acc : accounts) {
@@ -249,6 +258,7 @@ public with sharing class SharingModelService {
         return referencesByContactIdsMap;
     }
 
+    @TestVisible
     private static Set<Id> getUsersIds(Map<Id, Set<Id>> userIdsSetByTerritoryIdMap) {
         Set<Id> usersIds = new Set<Id>();
         for (Set<Id> usersIdsSet : userIdsSetByTerritoryIdMap.values()) {
@@ -257,7 +267,7 @@ public with sharing class SharingModelService {
         return usersIds;
     }
 
-
+    @TestVisible
     private static void addHierarchicalRelationships(Map<Id, Set<Id>> userIdsSetByTerritoryIdMap) {
         Set<Id> parentIds = new Set<Id>(userIdsSetByTerritoryIdMap.keySet());
         do {
@@ -271,6 +281,7 @@ public with sharing class SharingModelService {
         } while (!parentIds.isEmpty());
     }
 
+    @TestVisible
     private static Map<Id, Set<Id>> getUserIdsSetByTerritoryIdMap(List<TerrUser__c> terrUsers) {
         Map<Id, Set<Id>> userIdsSetByTerritoryIdMap = new Map<Id, Set<Id>>();
         for (TerrUser__c terrUser : terrUsers) {
@@ -287,6 +298,7 @@ public with sharing class SharingModelService {
         return userIdsSetByTerritoryIdMap;
     }
 
+    @TestVisible
     private static Map<Id, Set<Id>> getContactIdsSetByAccountIdByReferencesMap(List<Reference__c> references) {
         Map<Id, Set<Id>> contactIdsSetByAccountIdByReferenceMap = new Map<Id, Set<Id>>();
         for (Reference__c reference : references) {
@@ -302,6 +314,7 @@ public with sharing class SharingModelService {
         return contactIdsSetByAccountIdByReferenceMap;
     }
 
+    @TestVisible
     private static Map<Id, Set<Id>> getAccountIdsSetByContactIdMap(List<Reference__c> references) {
         Map<Id, Set<Id>> accountIdsSetByContactIdMap = new Map<Id, Set<Id>>();
         for (Reference__c reference : references) {
@@ -317,6 +330,7 @@ public with sharing class SharingModelService {
         return accountIdsSetByContactIdMap;
     }
 
+    @TestVisible
     private static Map<Id, Set<Id>> getUserIdsSetByAccountIdMap(List<AccountShare> relatedAccountShares) {
         Map<Id, Set<Id>> userIdsSetByAccountIdMap = new Map<Id, Set<Id>>();
         for (AccountShare accShare : relatedAccountShares) {
@@ -332,6 +346,7 @@ public with sharing class SharingModelService {
         return userIdsSetByAccountIdMap;
     }
 
+    @TestVisible
     private static void createContactShares(Account acc, Id userId, List<ContactShare> contactShares) {
         for (Reference__c reference : acc.References__r) {
             ContactShare contactShare = createContactShare(reference, userId);
@@ -339,55 +354,67 @@ public with sharing class SharingModelService {
         }
     }
 
-
+    @TestVisible
     private static List<Account> getAccountsWithReferences(Set<Id> userIdsSetByTerritoryIdMap) {
         return AccountSelector.selectByTerritories(userIdsSetByTerritoryIdMap);
     }
 
+    @TestVisible
     private static Map<Id, Account> getAccountsWithReferencesById(List<Account> newAccounts) {
         return AccountSelector.selectByIds(newAccounts);
     }
 
+    @TestVisible
     private static List<Territory__c> getParentTerritories(Set<Id> territoryIds) {
         return TerritorySelector.selectByTerritoryIdsSet(territoryIds);
     }
 
+    @TestVisible
     private static List<Territory__c> getChildTerritories(Set<Id> parentIds) {
         return TerritorySelector.selectByParentTerritoryIdsSet(parentIds);
     }
 
+    @TestVisible
     private static List<Reference__c> getRelatedReferencesByAccounts(List<Account> newAccountsWithChangedTerritory) {
         return ReferenceSelector.selectByAccounts(newAccountsWithChangedTerritory);
     }
 
+    @TestVisible
     private static List<AccountShare> getAccountSharesByAccounts(List<Account> newAccountsWithChangedTerritory) {
         return AccountShareSelector.selectByAccounts(newAccountsWithChangedTerritory);
     }
 
+    @TestVisible
     private static List<AccountShare> getAccountSharesByAccountIdsSet(Set<Id> accountIdsSet) {
         return AccountShareSelector.selectByAccountIdsSet(accountIdsSet);
     }
 
+    @TestVisible
     private static List<AccountShare> getAccountShares(List<Account> accounts, Set<Id> usersIds) {
         return AccountShareSelector.selectByAccountAndUserIdsSet(accounts, usersIds);
     }
 
+    @TestVisible
     private static List<ContactShare> getContactSharesByContactIdsSet(Set<Id> contactIdsFromRelatedReferences) {
         return ContactShareSelector.selectByContactIdsSet(contactIdsFromRelatedReferences);
     }
 
+    @TestVisible
     private static List<ContactShare> getContactShares(Set<Id> contIdsSet, Set<Id> usersIds) {
         return ContactShareSelector.selectByContactIdsAndUserIds(contIdsSet, usersIds);
     }
 
+    @TestVisible
     private static AccountShare createAccountShare(Account acc, Id userId) {
         return SObjectCreator.createAccountShare(acc, userId);
     }
 
+    @TestVisible
     private static ContactShare createContactShare(Reference__c reference, Id userId) {
         return SObjectCreator.createContactShare(reference, userId);
     }
 
+    @TestVisible
     private static ContactShare createContactShare(Id contactId, AccountShare accShare) {
         return SObjectCreator.createContactShare(contactId, accShare);
     }

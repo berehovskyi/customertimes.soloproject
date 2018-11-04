@@ -18,4 +18,20 @@ public with sharing class SObjectsHelper {
         result.remove(null);
         return result;
     }
+
+    public static Set<Id> getIdFieldValuesWithNulls(List<SObject> sobjects, SObjectField field){
+        String fieldName = field.getDescribe().getName();
+        return getIdFieldValuesWithNulls(sobjects, fieldName);
+    }
+
+    public static Set<Id> getIdFieldValuesWithNulls(List<SObject> sobjects, String fieldName) {
+        Set<Id> result = new Set<Id>();
+        for(SObject sobj :sobjects){
+            Id value = (Id) sobj.get(fieldName);
+            result.add(value);
+        }
+        return result;
+    }
+
+
 }

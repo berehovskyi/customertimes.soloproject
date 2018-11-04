@@ -2,7 +2,7 @@
  * Created by oberegovskyi on 03-Nov-18.
  */
 
-trigger AccountTrigger on Account (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+trigger AccountTrigger on Account (/*before insert, before update, before delete, */after insert, after update/*, after delete, after undelete*/) {
 
     TriggerHandler handler = TriggerFactory.createHandler(Account.SObjectType);
 
