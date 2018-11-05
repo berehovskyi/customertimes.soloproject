@@ -50,17 +50,15 @@ public with sharing class SharingModelService {
     public static void updateSharedAccountsForAccounts(List<Account> newAccounts, Map<Id, Account> oldAccountsMap) {
         List<Account> newAccountsWithChangedTerritory = getNewAccountsWithChangedTerritory(newAccounts, oldAccountsMap);
         List<AccountShare> accountSharesToDelete = getAccountSharesByAccounts(newAccountsWithChangedTerritory);
-
-        delete accountSharesToDelete;
-
         List<Reference__c> relatedReferences = getRelatedReferencesByAccounts(newAccountsWithChangedTerritory);
         Map<Id, Set<Id>> contactIdsSetByAccountIdFromReferenceMap = getContactIdsSetByAccountIdByReferencesMap(relatedReferences);
         Set<Id> contactIdsFromRelatedReferences = SObjectsHelper.getIdFieldValues(relatedReferences, Reference__c.Contact__c);
-        List<ContactShare> contactSharesToPotentialDelete = getContactSharesByContactIdsSet(contactIdsFromRelatedReferences);
-        Map<Id, List<ContactShare>> contactSharesListByContactIdMap = getContactSharesListByContactIdMap(contactSharesToPotentialDelete);
+        List<ContactShare> contactShares = getContactSharesByContactIdsSet(contactIdsFromRelatedReferences);
+        Map<Id, List<ContactShare>> contactSharesListByContactIdMap = getContactSharesListByContactIdMap(contactShares);
         List<ContactShare> contactSharesToDelete = getContactSharesToDelete(
                 newAccountsWithChangedTerritory, contactIdsSetByAccountIdFromReferenceMap, contactSharesListByContactIdMap);
 
+        delete accountSharesToDelete;
         delete contactSharesToDelete;
 
         setSharedAccountsForAccounts(newAccountsWithChangedTerritory);
@@ -181,21 +179,6 @@ public with sharing class SharingModelService {
         return contactSharesToInsert;
     }
 
-    @TestVisible
-    private static Map<Id, Territory__c> getRelatedTerritoriesByIdMap(List<Account> newAccounts) {
-        Set<Id> territoriesIds = SObjectsHelper.getIdFieldValues(newAccounts, Account.Territory__c);
-        Map<Id, Territory__c> relatedTerritoriesByIdMap = new Map<Id, Territory__c>();
-        Set<Id> parentIds = new Set<Id>(territoriesIds);
-        do {
-            List<Territory__c> territories = getParentTerritories(parentIds);
-            for (Territory__c territory : territories) {
-                relatedTerritoriesByIdMap.put(territory.Id, territory);
-            }
-            parentIds.clear();
-            parentIds = SObjectsHelper.getIdFieldValues(territories, Territory__c.Parent_Territory__c);
-        } while (!parentIds.isEmpty());
-        return relatedTerritoriesByIdMap;
-    }
 
 
     @TestVisible
@@ -266,6 +249,23 @@ public with sharing class SharingModelService {
         }
         return usersIds;
     }
+
+    @TestVisible
+    private static Map<Id, Territory__c> getRelatedTerritoriesByIdMap(List<Account> newAccounts) {
+        Set<Id> territoriesIds = SObjectsHelper.getIdFieldValues(newAccounts, Account.Territory__c);
+        Map<Id, Territory__c> relatedTerritoriesByIdMap = new Map<Id, Territory__c>();
+        Set<Id> parentIds = new Set<Id>(territoriesIds);
+        do {
+            List<Territory__c> territories = getParentTerritories(parentIds);
+            for (Territory__c territory : territories) {
+                relatedTerritoriesByIdMap.put(territory.Id, territory);
+            }
+            parentIds.clear();
+            parentIds = SObjectsHelper.getIdFieldValues(territories, Territory__c.Parent_Territory__c);
+        } while (!parentIds.isEmpty());
+        return relatedTerritoriesByIdMap;
+    }
+
 
     @TestVisible
     private static void addHierarchicalRelationships(Map<Id, Set<Id>> userIdsSetByTerritoryIdMap) {
@@ -355,8 +355,8 @@ public with sharing class SharingModelService {
     }
 
     @TestVisible
-    private static List<Account> getAccountsWithReferences(Set<Id> userIdsSetByTerritoryIdMap) {
-        return AccountSelector.selectByTerritories(userIdsSetByTerritoryIdMap);
+    private static List<Account> getAccountsWithReferences(Set<Id> territoryIdsSet) {
+        return AccountSelector.selectByTerritories(territoryIdsSet);
     }
 
     @TestVisible
@@ -400,8 +400,8 @@ public with sharing class SharingModelService {
     }
 
     @TestVisible
-    private static List<ContactShare> getContactShares(Set<Id> contIdsSet, Set<Id> usersIds) {
-        return ContactShareSelector.selectByContactIdsAndUserIds(contIdsSet, usersIds);
+    private static List<ContactShare> getContactShares(Set<Id> contactIdsSet, Set<Id> userIdsSet) {
+        return ContactShareSelector.selectByContactIdsAndUserIds(contactIdsSet, userIdsSet);
     }
 
     @TestVisible
