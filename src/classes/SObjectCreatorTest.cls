@@ -8,7 +8,7 @@ private class SObjectCreatorTest {
     @IsTest
     static void createAccountShareTest() {
         Account account = new Account(Name = 'TestName');
-        Id userId = '000000000000000001';
+        Id userId = '00000000000000001';
 
         Test.startTest();
             AccountShare accShare = SObjectCreator.createAccountShare(account, userId);

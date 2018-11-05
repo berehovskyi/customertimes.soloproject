@@ -25,9 +25,46 @@ public with sharing class TerritorySelectorTest {
     }
 
     @IsTest
-    public static void test() {
+    public static void selectByTerritoryIdsSetTest() {
+        List<Territory__c> parentTerritories = [SELECT Id FROM Territory__c WHERE Name = 'TestParent'];
+        Set<Id> parentTerIds = new Set<Id>();
+        for (Territory__c ter : parentTerritories) {
+            parentTerIds.add(ter.Id);
+        }
+        List<Territory__c> terList = [SELECT Id, Parent_Territory__c FROM Territory__c WHERE Parent_Territory__c IN :parentTerIds];
+        Set<Id> terrIds = new Set<Id>();
+        for (Territory__c ter: terList) {
+            terrIds.add(ter.Id);
+        }
+
         Test.startTest();
-            List<Territory__c> territories = TerritorySelector.selectByTerritoryIdsSet(new Set<Id>());
+            List<Territory__c> territories = TerritorySelector.selectByTerritoryIdsSet(parentTerIds);
         Test.stopTest();
+
+        for (Territory__c ter : territories) {
+            System.assertEquals(true, parentTerIds.contains(ter.Id));
+        }
+    }
+
+    @IsTest
+    public static void selectByParentTerritoryIdsSetTest() {
+        List<Territory__c> parentTerritories = [SELECT Id FROM Territory__c WHERE Name = 'TestParent'];
+        Set<Id> parentTerIds = new Set<Id>();
+        for (Territory__c ter : parentTerritories) {
+            parentTerIds.add(ter.Id);
+        }
+        List<Territory__c> terList = [SELECT Id, Parent_Territory__c FROM Territory__c WHERE Parent_Territory__c IN :parentTerIds];
+        Set<Id> terrIds = new Set<Id>();
+        for (Territory__c ter: terList) {
+            terrIds.add(ter.Id);
+        }
+
+        Test.startTest();
+        List<Territory__c> territories = TerritorySelector.selectByParentTerritoryIdsSet(parentTerIds);
+        Test.stopTest();
+
+        for (Territory__c ter : territories) {
+            System.assertEquals(true, parentTerIds.contains(ter.Parent_Territory__c));
+        }
     }
 }

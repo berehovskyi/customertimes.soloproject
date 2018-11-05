@@ -30,7 +30,7 @@ public with sharing class TerritoryValidationService {
     @TestVisible
     private static void checkTerritoryNameUniqueness(List<Territory__c> territories, Map<Id, Set<String>> territoryNamesByParentTerIds) {
         for (Territory__c territory : territories) {
-            if (territoryNamesByParentTerIds.get(territory.Parent_Territory__c).contains(territory.Name)) {
+            if (territoryNamesByParentTerIds.containsKey(territory.Parent_Territory__c) && territoryNamesByParentTerIds.get(territory.Parent_Territory__c).contains(territory.Name)) {
                 territory.addError('Territory ' + territory.Name + ' already exists at this level');
             }
         }

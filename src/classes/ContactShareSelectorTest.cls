@@ -75,7 +75,10 @@ private class ContactShareSelectorTest {
             List<ContactShare> contactShares = ContactShareSelector.selectByContactIdsAndUserIds(contactIds, groupIds);
         Test.stopTest();
 
-        System.assertEquals(contacts[0].Id, contactShares[0].ContactId);
+        for (ContactShare conShare : contactShares) {
+            System.assertEquals(true, contactIds.contains(conShare.ContactId));
+        }
+
         System.assertEquals(10, contactShares.size());
     }
 }
